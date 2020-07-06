@@ -21,6 +21,11 @@
 // \brief Implements the Python extensions for Self Encrypting Drives
 //
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//
+// This file has been modified by FUTURA Cyber to support the FC-CMP platform
+//
+//-----------------------------------------------------------------------------
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/str.hpp>
@@ -42,6 +47,9 @@
 #endif
 #include <stdio.h>
 #define __PYTHON3__
+// fc-cmp support
+#include "../opensea-transport/include/common_public.h"
+#include "../opensea-operations/include/drive_info.h"
 
 using namespace Tcg;
 using namespace boost::python;
@@ -500,10 +508,10 @@ static const char * invokeDocs =
 				"                 credential is assumed to be mSID.\n"
 				"    timeout    - timeout of response in ms.  Default is 1000ms.\n"
 				"    noNamed    - Do not provide a named parameter list if parameter is supplied.  Value is not used.\n"
-				"    noClose    - Do not explicitly close the session when complete if parameter is supplied. Value is not used.\n"
+				"     noClose    - Do not instruct drive to close the session if parameter is supplied, but clear session handle (Session handle is cleared)\n"
 				"    useTls     - Override use of a Tls session.  By default, Tls is used when the authority is not Anybody.\n"
 				"    deferClose - Do not append a CloseSession token with method call, an additional transaction is used to close the session.\n"
-				"                 This is to avoid problems with TLS sessions being closed prior to method completion.  Value is not used.\n"
+				"                 This is to avoid problems with TLS sessions being closed prior to method completion.Not implemented\n"
 				"    <other kwargs>\n"
 				"               - Named method parameters.\n"
 				"\n"
@@ -774,8 +782,10 @@ BOOST_PYTHON_MODULE(pysed)
 					usePSK(args("uid", "cipherSuite", "key"), usePskDocs)
 					)
 			.add_property("currentCipherSuite",		&Sed::getCurrentCipherSuite)
-			.def("_l0", &Sed::l0discovery, "Dictionary of raw l0 discovery descriptors")
-			;
+			.def("_l0", &Sed::l0discovery, "Dictionary of raw l0 discovery descriptors");
+			// fc-cmp support
+			def("scan", scan);
+			def("driveQuery",fccmp_get_Drive_Information);
 		enum_<Tcg::StatusCode>("StatusCode")
 			.value("Success", 				SUCCESSCODE)
 			.value("NotAuthorized", 		NOT_AUTHORIZED)

@@ -44,7 +44,6 @@ import sys
 
 from setuptools import Command
 
-
 class BuildOpenSea(Command):
     user_options = []
 
@@ -59,7 +58,6 @@ class BuildOpenSea(Command):
         subprocess.call(['gmake', '-C', 'opensea-operations/Make/gcc'])
         subprocess.call(['gmake', '-C', 'opensea-common/Make/gcc'])
 
-
 pysed = Extension('TCGstorageAPI.pysed', [
         'pysed/pysed.cpp',
         'pysed/TcgDrive.cpp',
@@ -69,15 +67,16 @@ pysed = Extension('TCGstorageAPI.pysed', [
         'pysed/support.cpp',
         'pysed/Tls.cpp',
     ],
-    libraries=['boost_python3', 'gnutls', 'gnutlsxx', 'json-c'],
-    include_dirs = ['pysed','opensea-transport/include','opensea-common/include','opensea-operations/include','opensea-transport/include/vendor','/usr/include/json-c'],
-    extra_objects=['opensea-transport/Make/gcc/lib/libopensea-transport.a','opensea-common/Make/gcc/lib/libopensea-common.a','opensea-operations/Make/gcc/lib/libopensea-operations.a']
+    libraries=['boost_python3', 'gnutls', 'gnutlsxx' ],
+    include_dirs = ['pysed','opensea-transport/include','opensea-common/include','opensea-operations/include','opensea-transport/include/vendor','/usr/local/include'],
+    extra_objects=['opensea-transport/Make/gcc/lib/libopensea-transport.a','opensea-common/Make/gcc/lib/libopensea-common.a','opensea-operations/Make/gcc/lib/libopensea-operations.a'],
+    extra_compile_args=['-O0','-g','-DDISABLE_NVME_PASSTHROUGH']
 )
-'''
+
 if sys.platform == 'freebsd12':
     pysed.libraries=[lib.replace('boost_python3', 'boost_python37') for lib in pysed.libraries] 
     pysed.libraries.append('cam')
-'''
+
 setup(
     name='TCGstorageAPI',
     description='API implementing TCG storage specifications for SED',
@@ -85,8 +84,6 @@ setup(
     version='1.0',
     packages=['TCGstorageAPI'],
     ext_modules=[pysed],
-    url = 'https://gitlab.com/futura-cyber/seagate-pysed',
-    author = 'Seagate Technology LLC',
     cmdclass={
         'opensea': BuildOpenSea,
     }
